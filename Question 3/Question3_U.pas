@@ -1,0 +1,175 @@
+
+unit Question3_U;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, ExtCtrls, ComCtrls, Buttons, Math;
+
+type
+  TfrmQ3 = class(TForm)
+    redQ3GameBoard: TRichEdit;
+    rgbQ3: TRadioGroup;
+    btnQ3_1StartGame: TButton;
+    btnClose: TBitBtn;
+    btnQ3_2Play: TButton;
+    cmbRow: TComboBox;
+    cmbCol: TComboBox;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    redQ3Incorrect: TRichEdit;
+    btnQ3_3Reveal: TButton;
+    Label5: TLabel;
+    pnlQ3NumberOfGuesses: TPanel;
+    pnlPlay: TPanel;
+    procedure btnQ3_1StartGameClick(Sender: TObject);
+    procedure btnQ3_2PlayClick(Sender: TObject);
+    procedure btnQ3_3RevealClick(Sender: TObject);
+  private
+    { Private declarations }
+    arrGuess : array[1..9, 1..9] of Char;
+    iGuesses, iPlanetsFound : Integer;
+    procedure DisplayArray;
+  public
+    { Public declarations }
+  end;
+
+var
+  frmQ3: TfrmQ3;
+
+  // ===================================================================
+  // Provided code
+  // ===================================================================
+  arrGame: array [1..9, 1..9] of char;
+
+implementation
+
+{$R *.dfm}
+{$R+}
+
+// ===================================================================
+// Question 3.1
+// ===================================================================
+procedure TfrmQ3.btnQ3_1StartGameClick(Sender: TObject);
+var
+  iRow, iCol, iDifficulty, iPositions, iRandomR, iRandomC : Integer;
+  iDo  :Integer;
+  sLine : string;
+begin
+  //Question 3.1
+  iGuesses := 0;
+  iPlanetsFound := 0;
+  redQ3GameBoard.Lines.Clear;
+  redQ3Incorrect.Lines.Clear;
+
+  for iRow := 1 to 9 do
+    for iCol := 1 to 9 do
+      arrGame[iRow,iCol] := '-';
+
+  for iRow := 1 to 9 do
+    for iCol := 1 to 9 do
+      arrGuess[iRow,iCol] := '-';
+
+  DisplayArray;
+
+  iDifficulty := rgbQ3.ItemIndex+1;
+  iPositions := 50-((iDifficulty-1)*10);
+
+  iDo := 0;
+  while iPositions > 0 do
+  begin
+    iRandomR := RandomRange(1,10);
+    iRandomC := RandomRange(1,10);
+
+    if arrGame[iRandomR,iRandomC] <> '#' then
+    begin
+      arrGame[iRandomR,iRandomC] := '#';
+      Dec(iPositions);
+
+      if iDo < 2 then
+      begin
+        Inc(iDo);
+        rgbQ3.Items.Add('Row '+IntToStr(iRandomR)+' Column '+IntToStr(iRandomC));
+      end;
+    end;
+  end;
+
+  pnlQ3NumberOfGuesses.Caption := '0';
+  btnQ3_2Play.Enabled := True;
+end;
+
+// ===================================================================
+// Question 3.2
+// ===================================================================
+procedure TfrmQ3.btnQ3_2PlayClick(Sender: TObject);
+var
+  iGuessR, iGuessC : integer;
+begin
+  // Question 3.2
+  Inc(iGuesses);
+  iGuessR := cmbRow.ItemIndex+1;
+  iGuessC := cmbCol.ItemIndex+1;
+
+  if arrGame[iGuessR,iGuessC] = '#' then
+  begin
+    Inc(iPlanetsFound);
+    arrGuess[iGuessR,iGuessC] := '#';
+    DisplayArray;
+    pnlQ3NumberOfGuesses.Caption := IntToStr(iPlanetsFound);//wording takes preference over screenshots
+    if iPlanetsFound = 2 then
+    begin
+      btnQ3_2Play.Enabled := False;
+      ShowMessage('Game won');
+    end;
+  end
+  else
+  begin
+    redQ3Incorrect.Lines.Add('R'+IntToStr(iGuessR)+', C'+IntToStr(iGuessC));
+    if iGuesses = 5 then
+    begin
+      btnQ3_2Play.Enabled := false;
+      ShowMessage('Game lost');
+    end;
+  end;
+end;
+
+// ===================================================================
+// Question 3.3
+// ===================================================================
+procedure TfrmQ3.btnQ3_3RevealClick(Sender: TObject);
+var
+  iRow, iCol : Integer;
+  I: Integer;
+begin
+  // Question 3.3
+  for iRow := 1 to 9 do
+    for iCol := 1 to 9 do
+      if arrGuess[iRow,iCol] = '#' then
+        arrGame[iRow,iCol] := '$';
+
+  for iRow := 1 to 9 do
+    for iCol := 1 to 9 do
+      arrGuess[iRow,iCol] := arrGame[iRow,iCol];
+
+  DisplayArray;
+end;
+
+procedure TfrmQ3.DisplayArray;
+var
+  iRow, iCol : Integer;
+  sLine : string;
+begin
+  redQ3GameBoard.Lines.Clear;
+  for iRow := 1 to 9 do
+  begin
+    sLine := '';
+    for iCol := 1 to 9 do
+      sLine := sLine+arrGuess[iRow,iCol]+' ';
+    redQ3GameBoard.Lines.Add(sLine);
+  end;
+end;
+
+end.
